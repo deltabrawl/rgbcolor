@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Градиентный текст</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+      }
+      textarea, input {
+        background-color: #333;
+        color: white;
+        border: 1px solid #555;
+      }
+      h3, h2 {
+        color: white;
+      }
+      a {
+        color: #ffcc00;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+      <h3>Введите текст:</h3>
+      <textarea id="text" onchange="make();" onkeyup="make();">Твой текст:</textarea>
+      <h3>Предварительный просмотр текста:</h3>
+      <h2 id="out_text"></h2>
+      <h3>Градиентный текстовый код:</h3>
+      <textarea id="out_text_code"></textarea>
+      <h3>Colors: </h3>
+      <input type="color" value="#FF0000" id="fm1" onchange="make();">
+      <input type="color" value="#FFFF00" id="fm2" onchange="make();">
+      <input type="color" value="#00FF00" id="fm3" onchange="make();">
+      <p>
+        <a href="javascript:colors('#FF0000','#FFFF00','#00FF00');">Red -> Green</a>
+        <br>
+        <a href="javascript:colors('#FF0000','#FF00FF','#0000FF');">Red -> Blue</a>
+        <br>
+        <a href="javascript:colors('#00FF00','#FFFF00','#FF0000');">Green -> Red</a>
+        <br>
+        <a href="javascript:colors('#00FF00','#00FFFF','#0000FF');">Green -> Blue</a>
+        <br>
+        <a href="javascript:colors('#0000FF','#FF00FF','#FF0000');">Blue -> Red</a>
+        <br>
+        <a href="javascript:colors('#0000FF','#00FFFF','#00FF00');">Blue -> Green</a>
+        <br>
+      </p>
+    </center>
+    <script>
+      function colors(start, mid, end) {
+        document.getElementById("fm1").value = start;
+        document.getElementById("fm2").value = mid;
+        document.getElementById("fm3").value = end;
+        make();
+      }
+
+      function make() {
+        var text = document.getElementById("text").value;
+        var out_text = "";
+        var out_text_html = "";
+        var fm1 = document.getElementById("fm1").value;
+        var fm2 = document.getElementById("fm2").value;
+        var fm3 = document.getElementById("fm3").value;
+        var colors = generateMultiColors(fm1, fm2, fm3, text.length);
+        console.log(colors);
+        for (var i = 0; i < text.length; i++) {
+          out_text_html += "<font color=\"" + colors[i] + "\">" + text.charAt(i) + "</font>";
+          out_text += "<c" + colors[i] + ">" + text.charAt(i);
+        }
+        out_text += "</c>";
+        document.getElementById("out_text_code").value = out_text;
+        document.getElementById("out_text").innerHTML = out_text_html;
+      }
+
+      function hex(c) {
+        var s = "0123456789abcdef";
+        var i = parseInt(c);
+        if (i == 0 || isNaN(c))
+          return "00";
+        i = Math.round(Math.min(Math.max(0, i), 255));
+        return s.charAt((i - i % 16) / 16) + s.charAt(i % 16);
+      }
+
+      function convertToHex(rgb) {
+        return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
+      }
+
+      function convertToRGB(hex) {
+        if (hex.charAt(0) == '#') {
+          hex = hex.substring(1);
+        }
+        var color = [];
+        color[0] = parseInt(hex.substring(0, 2), 16);
+        color[1] = parseInt(hex.substring(2, 4), 16);
+        color[2] = parseInt(hex.substring(4, 6), 16);
+        return color;
+      }
+
+      function generateColors(colorStart, colorEnd, colorCount) {
+        var start = convertToRGB(colorStart);    
+        var end = convertToRGB(colorEnd);    
+        var alpha = 1.0;
+        var saida = [];
+        for (i = 0; i < colorCount; i++) {
+          var c = [];
+          alpha -= (1.0 / colorCount);
+          c[0] = start[0] * alpha + (1 - alpha) * end[0];
+          c[1] = start[1] * alpha + (1 - alpha) * end[1];
+          c[2] = start[2] * alpha + (1 - alpha) * end[2];
+          saida.push(convertToHex(c));
+        }
+        return saida;
+      }
+
+      function generateMultiColors(colorStart, colorMid, colorEnd, colorCount) {
+        var h = Math.round(colorCount / 2);
+        var saida = generateColors(colorStart, colorMid, h);
+        var saidaEnd = generateColors(colorMid, colorEnd, h);
+        if (colorCount % 2 == 1) {
+          if (colorMid.charAt(0) == '#') {
+            colorMid = colorMid.substring(1);
+          }
+          saida.push(colorMid);
+        }
+        return saida.concat(saidaEnd);
+      }
+
+      make();
+    </script>
+  </body>
+</html>
